@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="Big5>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>另存成HTML檔案</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            color: black;
+        }
+
+        textarea {
+            flex: 1;
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto 10px auto;
+            padding: 12px;
+            border: 1px solid #ccc;
+            resize: none;
+            box-sizing: border-box;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            background-color: #ffffff;
+            color: black;
+            border-radius: 8px;
+            outline: none;
+            min-height: 200px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 10px 0 20px 0;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-width: 120px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            background-color: #388e3c;
+        }
+
+        @media (max-width: 600px) {
+            textarea {
+                font-size: 1rem;
+            }
+
+            button {
+                font-size: 1rem;
+                padding: 12px;
+                min-width: 100px;
+            }
+
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <textarea id="htmlInput" placeholder="在這裡輸入HTML語法..."></textarea>
+    <div class="button-container">
+        <button onclick="downloadHTML()">另存成HTML檔案</button>
+        <button onclick="resetTextarea()">清除</button>
+    </div>
+
+    <script>
+        function downloadHTML() {
+            const content = document.getElementById('htmlInput').value;
+            const blob = new Blob([content], { type: 'text/html;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'my-file.html';
+            link.click();
+            URL.revokeObjectURL(url); // 釋放資源
+        }
+
+        function resetTextarea() {
+            document.getElementById('htmlInput').value = '';
+        }
+    </script>
+</body>
+</html>
