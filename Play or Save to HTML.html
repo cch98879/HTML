@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play or Save to HTML</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #fdfdfd;
+            color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        textarea {
+            width: 90%;
+            max-width: 800px;
+            height: 300px;
+            margin: 24px auto 16px auto;
+            padding: 16px;
+            font-size: 20px;
+            font-family: 'Courier New', monospace;
+            background-color: #ffffff;
+            color: black;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 16px 32px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            min-width: 160px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            background-color: #388e3c;
+        }
+
+        @media (max-width: 600px) {
+            textarea {
+                height: 240px;
+                font-size: 18px;
+            }
+
+            button {
+                font-size: 18px;
+                padding: 14px 24px;
+                min-width: 140px;
+            }
+
+            .button-container {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <textarea id="htmlInput"></textarea>
+    <div class="button-container">
+        <button onclick="renderHTML()">Play</button>
+        <button onclick="downloadHTML()">Save</button>
+        <button onclick="resetTextarea()">Clear</button>
+    </div>
+
+    <script>
+        function renderHTML() {
+            const htmlCode = document.getElementById('htmlInput').value;
+            const newWindow = window.open("", "HTML");
+            newWindow.document.open();
+            newWindow.document.write(htmlCode);
+            newWindow.document.close();
+        }
+
+        function downloadHTML() {
+            let content = document.getElementById('htmlInput').value;
+
+            // 確保包含 UTF-8 編碼設定
+            if (!content.includes('<meta charset="utf-8">')) {
+                content = '<meta charset="utf-8">\n' + content;
+            }
+
+            const blob = new Blob([content], { type: 'text/html;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'GAME.html';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function resetTextarea() {
+            document.getElementById('htmlInput').value = '';
+        }
+    </script>
+</body>
+</html>
