@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彰化社區大學隨機抽獎系統</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #1e2a47, #5f6d98);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #f0e68c;
+        }
+
+        .container {
+            text-align: center;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+        }
+
+        input[type="number"] {
+            width: 100px;
+        }
+
+        button {
+            background-color: #f0e68c;
+            color: #1e2a47;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #bdb76b;
+        }
+
+        table {
+            margin-top: 20px;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        td {
+            width: 10%;
+            height: 50px;
+            text-align: center;
+            vertical-align: middle;
+            background-color: #3a4a6e;
+            border: 1px solid #555;
+            font-size: 1.5em;
+            color: #f0e68c;
+        }
+
+        td.highlight {
+            background-color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        td.highlight.final {
+            color: #fff; /* 白色字體 */
+            font-weight: bolder; /* 加粗 */
+        }
+
+        .countdown {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
+        .win-message {
+            display: none;
+            font-size: 1.5em;
+            margin-top: 20px;
+            color: #ffeb3b;
+        }
+
+        .highlight-animation {
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.1);
+            }
+        }
+
+        .winning-number {
+            font-size: 2em;
+            font-weight: bolder;
+            color: white;
+            background-color: red;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>彰化社區大學隨機抽獎系統</h1>
+        <label for="cellCount">儲存格數量：</label>
+        <input type="number" id="cellCount" min="1" max="100" value="20">
+        <br>
+
+        <label for="seconds">倒數秒數：</label>
+        <input type="number" id="seconds" min="1" value="5">
+        <br>
+
+        <button onclick="generateTable()">設定</button>
+        <button onclick="startRandomHighlight()">開始抽獎</button>
+
+        <table id="cellTable"></table>
+
+        <div class="countdown">倒數時間：<span id="timeDisplay">0.000</span> 秒</div>
+        <div class="win-message" id="winMessage">恭喜得獎！</div>
+        <div class="winning-number" id="winningNumber"></div>
+    </div>
+
+    <script>
+        let totalCells = 0;
+        let timer = null;
+        let secondsRemaining = 0;
+        let interval = null;
+        let lastHighlightedCell = null; // 用來記錄最後一個亮黃底的儲存格
+        let highlightedCells = []; // 用來追蹤已經高亮的儲存格
+
+        function generateTable() {
+            totalCells = parseInt(document.getElementById('cellCount').value);
+            let table = document.getElementById('cellTable');
+            table.innerHTML = ''; // Clear previous table
+            let row = null;
+            let count = 1;
+
+            for (let i = 0; i < Math.ceil(totalCells / 10); i++) {
+                row = document.createElement('tr');
+                for (let j = 0; j < 10 && count <= totalCells; j++) {
+                    let cell = document.createElement('td');
+                    cell.textContent = count;
+                    row.appendChild(cell);
+                    count++;
+                }
+                table.appendChild(row);
+            }
+
+            // 重置已高亮的儲存格
+            highlightedCells = [];
+        }
+
+        function startRandomHighlight() {
+            secondsRemaining = parseInt(document.getElementById('seconds').value);
+            document.getElementById('winMessage').style.display = 'none';
+            document.getElementById('winningNumber').style.display = 'none';
+            clearInterval(interval);
+
+            // Reset highlighted cells and start from scratch
+            highlightedCells = [];
+            interval = setInterval(function () {
+                if (secondsRemaining <= 0) {
+                    clearInterval(interval);
+                    showFinalHighlightedCell(); // 倒數結束時，顯示最後一個高亮儲存格
+                    return;
+                }
+                secondsRemaining -= 0.1;
+                document.getElementById('timeDisplay').textContent = secondsRemaining.toFixed(3);
+                highlightRandomCell();
+            }, 100);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                document.getElementById('winMessage').style.display = 'block';
+                showFinalHighlightedCell(); // 讓最後一個儲存格顯示為「恭喜得獎！」
+            }, secondsRemaining * 1000);
+        }
+
+        function highlightRandomCell() {
+            let cells = document.querySelectorAll('td');
+            cells.forEach(cell => cell.classList.remove('highlight', 'highlight-animation', 'final'));
+
+            // Get all cells and ensure we track every cell
+            let availableCells = Array.from(cells).filter(cell => !highlightedCells.includes(cell));
+
+            // If all cells have been highlighted, reset the list
+            if (availableCells.length === 0) {
+                availableCells = Array.from(cells);
+                highlightedCells = []; // Reset
+            }
+
+            // Pick a random cell from the available ones
+            let randomCell = availableCells[Math.floor(Math.random() * availableCells.length)];
+            highlightedCells.push(randomCell); // Mark this cell as highlighted
+
+            randomCell.classList.add('highlight', 'highlight-animation');
+            lastHighlightedCell = randomCell;
+        }
+
+        function showFinalHighlightedCell() {
+            if (lastHighlightedCell) {
+                lastHighlightedCell.classList.add('final');
+                document.getElementById('winningNumber').style.display = 'block';
+                document.getElementById('winningNumber').textContent = `得獎號碼：${lastHighlightedCell.textContent}`;
+            }
+        }
+    </script>
+</body>
+</html>
