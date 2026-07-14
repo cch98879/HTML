@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>柱狀圖_李信賢設計</title>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<style>
+body { font-family: "Noto Serif CJK TC", serif; background:#f0f2f5; }
+#inputArea { margin-bottom: 20px; background: linear-gradient(135deg,#e0f0ff,#c0e0ff); padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
+#inputArea h3 { font-size:22px; margin-bottom:15px; color:#004080;}
+#inputArea label { font-size:18px; color:#003366; margin-right:15px;}
+#inputArea input[type="text"], #inputArea input[type="number"] { font-size:18px; padding:6px 10px; border:2px solid #007acc; border-radius:6px; margin-right:10px; width:120px; color:#003366; }
+#inputArea button { font-size:18px; padding:6px 12px; border:none; border-radius:6px; background:linear-gradient(135deg,#00aaff,#0055cc); color:#fff; cursor:pointer; transition: all 0.2s; }
+#inputArea button:hover { background:linear-gradient(135deg,#007acc,#003366);}
+#inputs div { margin-bottom:8px; }
+</style>
+</head>
+
+<body>
+<div id="container" style="width:100%; height:520px;"></div>
+<div id="inputArea">
+  <h3>繪製柱狀圖</h3>
+
+  <label>標題名稱：<input type="text" id="chartTitle" style="width:1500px;" value="跌倒發生統計"></label>
+  <br><br>
+  <label>橫軸：<input type="text" style="width:300px;" id="xAxisTitle" value="如何發生"></label>
+  <label>縱軸：<input type="text" id="yAxisTitle" value="人數"></label>
+  <br><br>
+
+  <div id="inputs">
+     <div>
+      <span class="categoryLabel">如何發生</span>：
+      <input type="text" class="name" style="width:350px;" value="上下床">
+      <span class="amountLabel">人數</span>：
+      <input type="number" class="value" value="5">
+      <button onclick="removeRow(this)">移除此欄位</button>
+    </div>
+    <div>
+      <span class="categoryLabel">如何發生</span>：
+      <input type="text" class="name" style="width:350px;" value="行進時">
+      <span class="amountLabel">人數</span>：
+      <input type="number" class="value" value="3">
+      <button onclick="removeRow(this)">移除此欄位</button>
+    </div>
+    <div>
+      <span class="categoryLabel">如何發生</span>：
+      <input type="text" class="name" style="width:350px;" value="床休息">
+      <span class="amountLabel">人數</span>：
+      <input type="number" class="value" value="2">
+      <button onclick="removeRow(this)">移除此欄位</button>
+    </div>
+    <div>
+      <span class="categoryLabel">如何發生</span>：
+      <input type="text" class="name" style="width:350px;" value="其他">
+      <span class="amountLabel">人數</span>：
+      <input type="number" class="value" value="2">
+      <button onclick="removeRow(this)">移除此欄位</button>
+    </div>	
+    <div>
+      <span class="categoryLabel">如何發生</span>：
+      <input type="text" class="name" style="width:350px;" value="進出洗手間">
+      <span class="amountLabel">人數</span>：
+      <input type="number" class="value" value="1">
+      <button onclick="removeRow(this)">移除此欄位</button>
+    </div>		
+    <div>
+      <span class="categoryLabel">如何發生</span>：
+      <input type="text" class="name" style="width:350px;" value="變換姿勢">
+      <span class="amountLabel">人數</span>：
+      <input type="number" class="value" value="1">
+      <button onclick="removeRow(this)">移除此欄位</button>
+    </div>
+
+  </div>
+
+  <button onclick="addRow()">新增欄位</button>
+  <button onclick="updateChart()">更新柱狀圖</button>
+</div>
+
+
+
+<script>
+let chart;
+
+function addRow(){
+  const xLabel = document.getElementById('xAxisTitle').value || '當時如何發生跌倒';
+  const yLabel = document.getElementById('yAxisTitle').value || '人數';
+
+  const div = document.createElement('div');
+  div.innerHTML = `
+    <span class="categoryLabel">${xLabel}</span>：
+    <input type="text" style="width:350px;" class="name">
+    <span class="amountLabel">${yLabel}</span>：
+    <input type="number" class="value">
+    <button onclick="removeRow(this)">移除此欄位</button>
+  `;
+  document.getElementById('inputs').appendChild(div);
+}
+
+function removeRow(btn){ btn.parentNode.remove(); }
+
+function getRawData(){
+  const rows = document.querySelectorAll('#inputs > div');
+  const data = [];
+  rows.forEach(row=>{
+    const name = row.querySelector('.name').value.trim();
+    const value = parseFloat(row.querySelector('.value').value) || 0;
+    if(name && value > 0){
+      data.push({ name, value });
+    }
+  });
+  return data;
+}
+
+function updateChart(){
+  let rawData = getRawData();
+  if(rawData.length === 0){ alert('請至少輸入一筆資料'); return; }
+
+  // 金額由大到小排序
+  rawData.sort((a,b)=>b.value - a.value);
+
+  const total = rawData.reduce((s,d)=>s+d.value,0);
+
+  // 生成系列資料
+  const categories = rawData.map(d=>d.name);
+  const seriesData = rawData.map(d=>{
+    const rawUnit = document.getElementById('yAxisTitle').value || '';
+    const match = rawUnit.match(/\(.*?\)/);
+    const unit = match ? match[0] : '';
+    return {
+      y: d.value,
+      name: d.name,
+      dataLabels: {
+        enabled:true,
+        formatter:function(){
+          //return this.point.name + this.point.y + unit + '<br/>' + ((this.point.y/total)*100).toFixed(2) + '%';
+		            return this.point.y + unit ;
+        }
+      }
+    };
+  });
+
+  if(chart) chart.destroy();
+
+  chart = Highcharts.chart('container',{
+    chart:{ type:'column', style:{ fontFamily:'Noto Serif CJK TC', fontSize:'16px' } },
+    title:{ text:'' },
+    caption:{
+      text: document.getElementById('chartTitle').value,
+      align:'center',
+      verticalAlign:'bottom',
+      style:{ fontSize:'20px', fontWeight:'bold', color:'#003366' }
+    },
+    credits:{ enabled:false },
+exporting: {
+    enabled: true,
+    filename: 'BarChart',
+    buttons: {
+        contextButton: {
+            menuItems: [
+                {
+                    text: '下載 JPEG',
+                    onclick: function() {
+                        this.exportChart(
+                            { type: 'image/jpeg' },
+                            { filename: 'BarChart' }
+                        );
+                    }
+                },
+                {
+                    text: '下載 Excel',
+                    onclick: function() {
+                        this.downloadXLS();
+                    }
+                }
+            ]
+        }
+    }
+},
+
+	
+    legend:{
+      enabled:false   // ✅【重點】隱藏下方「金額」「趨勢」
+    },	
+	
+	
+    xAxis:{
+      categories: categories,
+      title:{ text: document.getElementById('xAxisTitle').value, style:{ fontSize:'18px', color:'#003366' } },
+      labels:{ style:{ fontSize:'16px', color:'#003366' } }
+    },
+    yAxis:{
+      title:{ text: document.getElementById('yAxisTitle').value, style:{ fontSize:'18px', color:'#003366' } },
+      labels:{ style:{ fontSize:'16px', color:'#003366' } }
+    },
+    tooltip:{
+      formatter: function(){
+        const rawUnit = document.getElementById('yAxisTitle').value || '';
+        const match = rawUnit.match(/\(.*?\)/);
+        const unit = match ? match[0] : '';
+        //return this.point.name + this.point.y + unit + '<br/>' + ((this.point.y/total)*100).toFixed(2) + '%';
+		        return this.point.y + unit;
+      }
+    },
+    plotOptions:{
+      column:{
+        dataLabels:{
+          enabled:true,
+          style:{ fontSize:'16px', color:'#000' }
+        }
+      }
+    },
+    series:[{
+      name:'金額',
+      data: seriesData,
+      colorByPoint:true
+    }]
+  });
+}
+
+updateChart();
+
+/* 表單即時同步 */
+document.getElementById('chartTitle').addEventListener('input',()=>{ if(chart) chart.update({ caption:{ text:chartTitle.value } }); });
+document.getElementById('xAxisTitle').addEventListener('input',function(){ document.querySelectorAll('.categoryLabel').forEach(e=>e.textContent=this.value||'項目'); });
+document.getElementById('yAxisTitle').addEventListener('input',function(){ document.querySelectorAll('.amountLabel').forEach(e=>e.textContent=this.value||'金額'); updateChart(); });
+</script>
+
+</body>
+</html>
