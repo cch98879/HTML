@@ -24,52 +24,52 @@ body { font-family: "Noto Serif CJK TC", serif; background:#f0f2f5; }
 <body>
 <div id="container" style="width:100%; height:520px;"></div>
 <div id="inputArea">
-  <h3>練習繪製柱狀圖</h3>
+  <h3>繪製柱狀圖</h3>
 
-  <label>標題名稱：<input type="text" id="chartTitle" style="width:1500px;" value="住院單位跌倒人數柏拉圖(匡列日期：2024年03月、2024年08月、2024年10月、2025年10月)-(匡列年齡：51~65歲、66~80歲、80歲以上)-選定(七二病房、七三病房)"></label>
+  <label>標題名稱：<input type="text" id="chartTitle" style="width:1500px;" value="跌倒發生統計"></label>
   <br><br>
-  <label>項目名稱：<input type="text" style="width:300px;" id="xAxisTitle" value="當時如何發生跌倒"></label>
-  <label>數據名稱：<input type="text" id="yAxisTitle" value="人數"></label>
+  <label>橫軸：<input type="text" style="width:300px;" id="xAxisTitle" value="如何發生"></label>
+  <label>縱軸：<input type="text" id="yAxisTitle" value="人數"></label>
   <br><br>
 
   <div id="inputs">
      <div>
-      <span class="categoryLabel">當時如何發生跌倒</span>：
+      <span class="categoryLabel">如何發生</span>：
       <input type="text" class="name" style="width:350px;" value="上下床">
       <span class="amountLabel">人數</span>：
       <input type="number" class="value" value="5">
       <button onclick="removeRow(this)">移除此欄位</button>
     </div>
     <div>
-      <span class="categoryLabel">當時如何發生跌倒</span>：
+      <span class="categoryLabel">如何發生</span>：
       <input type="text" class="name" style="width:350px;" value="行進時">
       <span class="amountLabel">人數</span>：
       <input type="number" class="value" value="3">
       <button onclick="removeRow(this)">移除此欄位</button>
     </div>
     <div>
-      <span class="categoryLabel">當時如何發生跌倒</span>：
+      <span class="categoryLabel">如何發生</span>：
       <input type="text" class="name" style="width:350px;" value="床休息">
       <span class="amountLabel">人數</span>：
       <input type="number" class="value" value="2">
       <button onclick="removeRow(this)">移除此欄位</button>
     </div>
     <div>
-      <span class="categoryLabel">當時如何發生跌倒</span>：
+      <span class="categoryLabel">如何發生</span>：
       <input type="text" class="name" style="width:350px;" value="其他">
       <span class="amountLabel">人數</span>：
       <input type="number" class="value" value="2">
       <button onclick="removeRow(this)">移除此欄位</button>
     </div>	
     <div>
-      <span class="categoryLabel">當時如何發生跌倒</span>：
+      <span class="categoryLabel">如何發生</span>：
       <input type="text" class="name" style="width:350px;" value="進出洗手間">
       <span class="amountLabel">人數</span>：
       <input type="number" class="value" value="1">
       <button onclick="removeRow(this)">移除此欄位</button>
     </div>		
     <div>
-      <span class="categoryLabel">當時如何發生跌倒</span>：
+      <span class="categoryLabel">如何發生</span>：
       <input type="text" class="name" style="width:350px;" value="變換姿勢">
       <span class="amountLabel">人數</span>：
       <input type="number" class="value" value="1">
